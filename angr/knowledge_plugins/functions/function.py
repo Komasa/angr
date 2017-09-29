@@ -224,6 +224,16 @@ class Function(object):
         return False
 
     @property
+    def loads(self):
+        """All loads that are done by this functions."""
+        return [exp for block in self.blocks for exp in block.vex.expressions if exp.tag == "Iex_Load" ]
+
+    @property
+    def stores(self):
+        """All stores that are done by this function"""
+        return [exp for block in self.blocks for exp in block.vex.statements if exp.tag == "Ist_Store" ]
+
+    @property
     def operations(self):
         """
         All of the operations that are done by this functions.
@@ -451,6 +461,13 @@ class Function(object):
         """
 
         return self._project.loader.find_object_containing(self.addr)
+
+    @property
+    def demangled_name(self):
+        if self.name in self._function_manager._kb.obj.demangled_names:
+            return self._function_manager._kb.obj.demangled_names[self.name]
+        else:
+            return self.name
 
     def add_jumpout_site(self, node):
         """
@@ -1005,6 +1022,9 @@ class Function(object):
 
         self.normalized = True
 
+    @property
+    def complexity(self):
+        return self._project.analyses.Complexity(self)
 
 from ...codenode import BlockNode
 from ...errors import AngrValueError
