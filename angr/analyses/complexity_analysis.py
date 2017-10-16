@@ -36,7 +36,7 @@ class HalsteadComplexity():
             Get all Operands of a statement
             Operands are either constants or reads from a temporary register
             """
-            unhandled = ["Ist_Dirty", 'Ist_CAS']
+            unhandled = ["Ist_Dirty", 'Ist_CAS', 'Ist_AbiHint']
             if smt.tag in unhandled:
                 #TODO: Figure out if they need to be handled somehow, ignoring for now
                 return []
@@ -109,12 +109,10 @@ class HalsteadComplexity():
 
 
 class ComplexityAnalysis(Analysis):
-    #TODO: Decide how to manage information about functions (dict maybe?)
-    #TODO: Some kind of caching for analysis results because
-    #some metrics are needed as part of other metrics and expensive to compute (e.g. Halstead)
     """Class that provides all the analysis methods"""
     def __init__(self, function):
         self.function = function
+        self.metric_cache = {}
 
 
     @property
@@ -124,7 +122,13 @@ class ComplexityAnalysis(Analysis):
 
     @property
     def halstead_complexity(self):
-        with self._resilience():
-            return HalsteadComplexity(self.function)
+        if "Halstead" not in self.metric_cache:
+            with self._resilience():
+                self.metric_cache['Halstead'] = HalsteadComplexity(self.function)
+            if "Halstead" not in self.metric_cache:
+                # TODO find better way to deal with failed analysis
+                return None
+
+        return self.metric_cache['Halstead']
 
 register_analysis(ComplexityAnalysis, 'Complexity')

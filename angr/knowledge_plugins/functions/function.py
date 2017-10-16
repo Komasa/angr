@@ -125,6 +125,8 @@ class Function(object):
 
         self.info = { }  # storing special information, like $gp values for MIPS32
 
+        self._complexity = None
+
     @property
     def name(self):
         return self._name
@@ -1024,7 +1026,9 @@ class Function(object):
 
     @property
     def complexity(self):
-        return self._project.analyses.Complexity(self)
+        if not self._complexity:
+            self._complexity = self._project.analyses.Complexity(self)
+        return self._complexity
 
 from ...codenode import BlockNode
 from ...errors import AngrValueError
