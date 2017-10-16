@@ -11,18 +11,18 @@ Structure:
 
 ComplexityAnalysis Class that will be accessable via a property of a function
 This class has various metrics as properties, either as simple functions
-for something like cyclomatic complexity or classes for something like Halsteadt
+for something like cyclomatic complexity or classes for something like Halstead
 
 """
-class HalsteadtComplexity():
-    """Represents the various Halsteadt metrics"""
+class HalsteadComplexity():
+    """Represents the various Halstead metrics"""
     def __init__(self, function):
 
         self.n1, self.n2, self.N1, self.N2 = self.function_to_basemetrics(function)
 
 
     def function_to_basemetrics(self, function):
-        """Calculates the basic metrics of Halsteadt out of a Function"""
+        """Calculates the basic metrics of Halstead out of a Function"""
         #TODO This implementation does not count calls to other functions and should only be regarded as an inital PoC !!!
 
         # the number of distinct operators
@@ -111,7 +111,7 @@ class HalsteadtComplexity():
 class ComplexityAnalysis(Analysis):
     #TODO: Decide how to manage information about functions (dict maybe?)
     #TODO: Some kind of caching for analysis results because
-    #some metrics are needed as part of other metrics and expensive to compute (e.g. Halsteadt)
+    #some metrics are needed as part of other metrics and expensive to compute (e.g. Halstead)
     """Class that provides all the analysis methods"""
     def __init__(self, function):
         self.function = function
@@ -123,8 +123,8 @@ class ComplexityAnalysis(Analysis):
         return len(self.function.graph.edges()) - len(self.function.graph.nodes()) + 2
 
     @property
-    def halsteadt_complexity(self):
+    def halstead_complexity(self):
         with self._resilience():
-            return HalsteadtComplexity(self.function)
+            return HalsteadComplexity(self.function)
 
 register_analysis(ComplexityAnalysis, 'Complexity')
