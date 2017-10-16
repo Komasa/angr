@@ -1030,5 +1030,9 @@ class Function(object):
             self._complexity = self._project.analyses.Complexity(self)
         return self._complexity
 
+    @property
+    def complexity_noncached(self):
+        return self._project.analyses.Complexity(self)
+
 from ...codenode import BlockNode
 from ...errors import AngrValueError
