@@ -39,11 +39,8 @@ class ContextView(SimStatePlugin):
 
     def __pprint_stack_element(self, offset):
         print(str(offset * self.state.arch.bytes).rjust(4, "0")
-              + "| "+ hex(self.state.solver.eval(self.state.regs.sp + offset * self.state.arch.bits)) + "\t" + str(
-                    self.state.stack_read(
-                    offset *
-                                                                                           self.state.arch.bits,
-        self.state.arch.bytes)))
+              + "| "+ hex(self.state.solver.eval(self.state.regs.sp + offset * self.state.arch.bits)) + "\t"
+              + str(self.state.stack_read(offset * self.state.arch.bits, self.state.arch.bytes)))
 
     def registers(self):
         """
