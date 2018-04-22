@@ -22,6 +22,11 @@ class ContextView(SimStatePlugin):
 
     def code(self):
         print("[-------------------------------------code-------------------------------------]")
+        if "functions" in dir(self.state.project.kb):
+            ip = self.state.solver.eval(self.state.regs.ip)
+            f = self.state.project.kb.functions.floor_func(ip)
+            print(f.name + "+" + hex(ip - f.addr))
+
         self.state.block().pp()
 
 
