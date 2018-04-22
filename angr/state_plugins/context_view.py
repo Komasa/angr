@@ -59,7 +59,14 @@ class ContextView(SimStatePlugin):
             self.__pprint_register(reg, self.state.registers.load(register_number))
 
     def __pprint_register(self, reg, value):
-        print reg.upper() + ":\t"+ str(value)
+
+        print reg.upper() + ":\t" + self.__pstr_ast(value)
+
+    def __pstr_ast(self, ast):
+        if ast.concrete:
+            return hex(self.state.solver.eval(ast))
+        else:
+            return str(ast)
 
     def default_registers(self):
         custom ={
