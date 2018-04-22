@@ -24,10 +24,24 @@ class ContextView(SimStatePlugin):
         state.arch.default_symbolic_registers is supposed to give a sensible definition of general purpose registers
         Ordering is decided by the VEX register number
         """
-        for regnum,reg in sorted(
-                [(k,v) for k,v in self.state.context_view.state.arch.register_names.iteritems()
-                 if v in self.state.arch.default_symbolic_registers], key=lambda x: x[0]):
-            self.__pprint_register(reg, self.state.registers.load(regnum))
+        for reg in self.default_registers():
+            register_number = self.state.arch.registers[reg][0]
+            self.__pprint_register(reg, self.state.registers.load(register_number))
 
     def __pprint_register(self, reg, value):
         print reg.upper() + ":\t"+ str(value)
+
+    def default_registers(self):
+        custom ={
+            'X86': ['eax', 'ebx', 'ecx', 'edx', 'esi', 'edi', 'ebp', 'esp', 'eip'],
+            'AMD64': ['rax', 'rbx', 'rcx', 'rdx', 'rsi', 'rdi', 'rbp', 'rsp', 'rip', 'r8', 'r9', 'r10', 'r11', 'r12',
+                      'r13', 'r14', 'r15']
+        }
+        if self.state.arch.name in custom:
+            return custom[self.state.arch.name]
+        else:
+            l.warn("No custom register list implemented, using fallback")
+            return self.state.arch.default_symbolic_registers\
+                   + [self.state.arch.register_names[self.state.arch.ip_offset]]\
+                   + [self.state.arch.register_names[self.state.arch.sp_offset]]\
+                   + [self.state.arch.register_names[self.state.arch.bp_offset]]
