@@ -16,7 +16,15 @@ class ContextView(SimStatePlugin):
 
     def pprint(self):
         """Pretty context view similiar to the context view of gdb plugins (peda and pwndbg)"""
-        raise NotImplementedError
+        self.state.context_view.registers()
+        self.state.context_view.code()
+        self.state.context_view.stack()
+
+    def code(self):
+        print("[-------------------------------------code-------------------------------------]")
+        self.state.block().pp()
+
+
 
     def stack(self):
         stackdepth = 8
