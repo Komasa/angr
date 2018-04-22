@@ -22,14 +22,16 @@ class ContextView(SimStatePlugin):
 
     def code(self):
         print("[-------------------------------------code-------------------------------------]")
+        self.__pprint_codeblock(self.state.history.bbl_addrs[-1])
+        print("|\t" + "" + "\nv")
+        self.__pprint_codeblock(self.state.solver.eval(self.state.regs.ip))
+
+
+    def __pprint_codeblock(self, ip):
         if "functions" in dir(self.state.project.kb):
-            ip = self.state.solver.eval(self.state.regs.ip)
             f = self.state.project.kb.functions.floor_func(ip)
             print(f.name + "+" + hex(ip - f.addr))
-
-        self.state.block().pp()
-
-
+        self.state.project.factory.block(ip).pp()
 
     def stack(self):
         stackdepth = 8
