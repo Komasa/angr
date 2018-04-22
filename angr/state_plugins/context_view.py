@@ -18,12 +18,30 @@ class ContextView(SimStatePlugin):
         """Pretty context view similiar to the context view of gdb plugins (peda and pwndbg)"""
         raise NotImplementedError
 
+    def stack(self):
+        stackdepth = 8
+        print("[------------------------------------stack-------------------------------------]")
+        #Not sure if that can happen, but if it does things will break
+        if not self.state.regs.sp.concrete:
+            print "STACK POINTER IS SYMBOLIC: " + str(self.state.regs.sp)
+            return
+        for o in range(stackdepth):
+            self.__pprint_stack_element(o)
+
+
+    def __pprint_stack_element(self, offset):
+        print(str(offset * self.state.arch.bytes).rjust(4, "0")
+              + "| "+ hex(self.state.solver.eval(self.state.regs.sp + offset * self.state.arch.bits)) + "\t" + str(
+                    self.state.stack_read(
+                    offset *
+                                                                                           self.state.arch.bits,
+        self.state.arch.bytes)))
+
     def registers(self):
         """
         Visualise the register state
-        state.arch.default_symbolic_registers is supposed to give a sensible definition of general purpose registers
-        Ordering is decided by the VEX register number
         """
+        print("[----------------------------------registers-----------------------------------]")
         for reg in self.default_registers():
             register_number = self.state.arch.registers[reg][0]
             self.__pprint_register(reg, self.state.registers.load(register_number))
