@@ -78,6 +78,8 @@ class ContextView(SimStatePlugin):
                 return " --> %s" % self.__pstr_ast(deref)
 
     def __pstr_ast(self, ast):
+        """Return a pretty string for an AST including a description of the derefed value if it makes sense (i.e. if
+        the ast is concrete and the derefed value is not uninitialized"""
         if ast.concrete:
             value = self.state.solver.eval(ast)
             if self.__describe_addr(value):
