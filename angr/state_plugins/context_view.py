@@ -47,7 +47,7 @@ class ContextView(SimStatePlugin):
         s += " | RODATA"
         print(s)
 
-    def cc(self, bv): # return color coded version of OV 
+    def cc(self, bv): # return color coded version of BV 
         if bv.symbolic:
             if bv.uninitialized:
                 return self.grey(self.__pstr_ast(bv))
@@ -57,9 +57,12 @@ class ContextView(SimStatePlugin):
             descr = " <%s>" % self.state.project.loader.describe_addr(addr)
             return self.red(hex(addr) + descr)
             #return self.red(hex(self.state.se.eval(bv)))
-        if self.state.se.eval(bv) >= self.state.se.eval(self.state.regs.sp):
+        if self.state.se.eval(bv) >= self.state.se.eval(self.state.regs.sp) and self.state.se.eval(bv) < self.state.arch.initial_sp:
             return self.yellow(hex(self.state.se.eval(bv)))
-        return self.__pstr_ast(bv)
+        try:
+            return self.__pstr_ast(bv)
+        except Exception as e:
+            return str(bv)
         
 
     def pprint(self):
