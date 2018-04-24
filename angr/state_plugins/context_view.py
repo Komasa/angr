@@ -47,7 +47,10 @@ class ContextView(SimStatePlugin):
         if bv.symbolic:
             return self.green(self.__pstr_ast(bv)) 
         if self.state.project.loader.find_object_containing(self.state.se.eval(bv)):
-            return self.red(hex(self.state.se.eval(bv)))
+            addr = self.state.se.eval(bv)
+            descr = " <%s>" % self.state.project.loader.describe_addr(addr)
+            return self.red(hex(addr) + descr)
+            #return self.red(hex(self.state.se.eval(bv)))
         if self.state.se.eval(bv) >= self.state.se.eval(self.state.regs.sp):
             return self.yellow(hex(self.state.se.eval(bv)))
         return self.__pstr_ast(bv)
