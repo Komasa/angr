@@ -23,8 +23,39 @@ class ContextView(SimStatePlugin):
     def green(self, text):
         return "\x1b[6;32;40m"+text+"\x1b[0m"
 
+    def yellow(self, text):
+        return "\x1b[6;33;40m"+text+"\x1b[0m"
+
+    def magenta(self, text):
+        return "\x1b[6;35;40m"+text+"\x1b[0m"
+
+    def underline(self, text):
+        return "\x1b[4m"+text+"\x1b[0m"
+
+    def print_legend(self):
+        s = "LEGEND: "
+        s += self.green("SYMBOLIC")
+        s += " | "+ self.yellow("STACK")
+        s += " | "+ self.blue("HEAP")
+        s += " | "+ self.red("CODE")
+        s += " | "+ self.magenta("DATA")
+        s += " | "+ self.underline("RWX")
+        s += " | RODATA"
+        print(s)
+
+    def cc(self, bv): # return color coded version of OV 
+        if bv.symbolic:
+            return self.green(self.__pstr_ast(bv)) 
+        if self.state.project.loader.find_object_containing(self.state.se.eval(bv)):
+            return self.red(hex(self.state.se.eval(bv)))
+        if self.state.se.eval(bv) >= self.state.se.eval(self.state.regs.sp):
+            return self.yellow(hex(self.state.se.eval(bv)))
+        return self.__pstr_ast(bv)
+        
+
     def pprint(self):
         """Pretty context view similiar to the context view of gdb plugins (peda and pwndbg)"""
+        self.print_legend()
         self.state.context_view.registers()
         self.state.context_view.code()
         self.state.context_view.stack()
@@ -57,9 +88,9 @@ class ContextView(SimStatePlugin):
 
     def __pprint_stack_element(self, offset):
         """Print stack element in the form OFFSET| ADDRESS --> CONTENT"""
-        print("%s| %x --> %s" % (
+        print("%s| %s --> %s" % (
             "{0:#04x}".format(offset * self.state.arch.bytes),
-            self.state.solver.eval(self.state.regs.sp + offset * self.state.arch.bits),
+            self.cc(self.state.regs.sp + offset * self.state.arch.bits),
             self.__pstr_ast(self.state.stack_read(offset * self.state.arch.bits, self.state.arch.bytes))))
 
 
@@ -73,7 +104,9 @@ class ContextView(SimStatePlugin):
             self.__pprint_register(reg, self.state.registers.load(register_number))
 
     def __pprint_register(self, reg, value):
-        print reg.upper() + ":\t" + self.__pstr_ast(value)
+        repr = reg.upper() + ":\t"
+        repr += self.cc(value)
+        print(repr)
 
     def __describe_addr(self, addr, depth=0):
         o = self.state.project.loader.find_object_containing(addr)
