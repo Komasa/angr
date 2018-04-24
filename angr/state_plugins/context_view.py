@@ -14,6 +14,15 @@ class ContextView(SimStatePlugin):
     def copy(self, memo):
         return ContextView()
 
+    def red(self, text):
+        return "\x1b[6;31;40m"+text+"\x1b[0m"
+
+    def blue(self, text):
+        return "\x1b[6;34;40m"+text+"\x1b[0m"
+
+    def green(self, text):
+        return "\x1b[6;32;40m"+text+"\x1b[0m"
+
     def pprint(self):
         """Pretty context view similiar to the context view of gdb plugins (peda and pwndbg)"""
         self.state.context_view.registers()
@@ -21,14 +30,13 @@ class ContextView(SimStatePlugin):
         self.state.context_view.stack()
 
     def code(self):
-        print("[-------------------------------------code-------------------------------------]")
+        print(self.blue("[-------------------------------------code-------------------------------------]"))
         try:
             self.__pprint_codeblock(self.state.history.bbl_addrs[-1])
             print("|\t" + str(self.state.history.jump_guard) + "\nv")
         except IndexError:
             pass
         self.__pprint_codeblock(self.state.solver.eval(self.state.regs.ip))
-
 
     def __pprint_codeblock(self, ip):
         if "functions" in dir(self.state.project.kb):
@@ -38,7 +46,7 @@ class ContextView(SimStatePlugin):
 
     def stack(self):
         stackdepth = 8
-        print("[------------------------------------stack-------------------------------------]")
+        print(self.blue("[------------------------------------stack-------------------------------------]"))
         #Not sure if that can happen, but if it does things will break
         if not self.state.regs.sp.concrete:
             print "STACK POINTER IS SYMBOLIC: " + str(self.state.regs.sp)
@@ -59,13 +67,12 @@ class ContextView(SimStatePlugin):
         """
         Visualise the register state
         """
-        print("[----------------------------------registers-----------------------------------]")
+        print(self.blue("[----------------------------------registers-----------------------------------]"))
         for reg in self.default_registers():
             register_number = self.state.arch.registers[reg][0]
             self.__pprint_register(reg, self.state.registers.load(register_number))
 
     def __pprint_register(self, reg, value):
-
         print reg.upper() + ":\t" + self.__pstr_ast(value)
 
     def __describe_addr(self, addr, depth=0):
@@ -103,3 +110,4 @@ class ContextView(SimStatePlugin):
                    + [self.state.arch.register_names[self.state.arch.ip_offset]]\
                    + [self.state.arch.register_names[self.state.arch.sp_offset]]\
                    + [self.state.arch.register_names[self.state.arch.bp_offset]]
+
