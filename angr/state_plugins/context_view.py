@@ -24,7 +24,7 @@ class ContextView(SimStatePlugin):
         print("[-------------------------------------code-------------------------------------]")
         try:
             self.__pprint_codeblock(self.state.history.bbl_addrs[-1])
-            print("|\t" + "" + "\nv")
+            print("|\t" + str(self.state.history.jump_guard) + "\nv")
         except IndexError:
             pass
         self.__pprint_codeblock(self.state.solver.eval(self.state.regs.ip))
