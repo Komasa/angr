@@ -52,13 +52,13 @@ class ContextView(SimStatePlugin):
             if bv.uninitialized:
                 return self.grey(self.__pstr_ast(bv))
             return self.green(self.__pstr_ast(bv)) 
-        if self.state.project.loader.find_object_containing(self.state.se.eval(bv)):
-            addr = self.state.se.eval(bv)
-            descr = " <%s>" % self.state.project.loader.describe_addr(addr)
-            return self.red(hex(addr) + descr)
-            #return self.red(hex(self.state.se.eval(bv)))
-        if self.state.se.eval(bv) >= self.state.se.eval(self.state.regs.sp) and self.state.se.eval(bv) < self.state.arch.initial_sp:
-            return self.yellow(hex(self.state.se.eval(bv)))
+        # its concrete
+        value = self.state.se.eval(bv)
+        if self.state.project.loader.find_object_containing(value):
+            descr = " <%s>" % self.state.project.loader.describe_addr(value)
+            return self.red(hex(value) + descr)
+        if value >= self.state.se.eval(self.state.regs.sp) and value <= self.state.arch.initial_sp:
+            return self.yellow(hex(value))
         try:
             return self.__pstr_ast(bv)
         except Exception as e:
