@@ -32,9 +32,13 @@ class ContextView(SimStatePlugin):
     def underline(self, text):
         return "\x1b[4m"+text+"\x1b[0m"
 
+    def grey(self, text):
+        return "\x1b[6;30;1;40m"+text+"\x1b[0m"
+
     def print_legend(self):
         s = "LEGEND: "
         s += self.green("SYMBOLIC")
+        s += " | "+ self.grey("UNINITIALIZED")
         s += " | "+ self.yellow("STACK")
         s += " | "+ self.blue("HEAP")
         s += " | "+ self.red("CODE")
@@ -45,6 +49,8 @@ class ContextView(SimStatePlugin):
 
     def cc(self, bv): # return color coded version of OV 
         if bv.symbolic:
+            if bv.uninitialized:
+                return self.grey(self.__pstr_ast(bv))
             return self.green(self.__pstr_ast(bv)) 
         if self.state.project.loader.find_object_containing(self.state.se.eval(bv)):
             addr = self.state.se.eval(bv)
