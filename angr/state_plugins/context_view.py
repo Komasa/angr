@@ -90,8 +90,8 @@ class ContextView(SimStatePlugin):
         """Print stack element in the form OFFSET| ADDRESS --> CONTENT"""
         print("%s| %s --> %s" % (
             "{0:#04x}".format(offset * self.state.arch.bytes),
-            self.cc(self.state.regs.sp + offset * self.state.arch.bits),
-            self.__pstr_ast(self.state.stack_read(offset * self.state.arch.bits, self.state.arch.bytes))))
+            self.cc(self.state.regs.sp + offset * self.state.arch.byte_width),
+            self.cc(self.state.stack_read(offset * self.state.arch.bits, self.state.arch.bytes))))
 
 
     def registers(self):
