@@ -22,8 +22,11 @@ class ContextView(SimStatePlugin):
 
     def code(self):
         print("[-------------------------------------code-------------------------------------]")
-        self.__pprint_codeblock(self.state.history.bbl_addrs[-1])
-        print("|\t" + "" + "\nv")
+        try:
+            self.__pprint_codeblock(self.state.history.bbl_addrs[-1])
+            print("|\t" + "" + "\nv")
+        except IndexError:
+            pass
         self.__pprint_codeblock(self.state.solver.eval(self.state.regs.ip))
 
 
@@ -47,7 +50,7 @@ class ContextView(SimStatePlugin):
     def __pprint_stack_element(self, offset):
         print(str(offset * self.state.arch.bytes).rjust(4, "0")
               + "| "+ hex(self.state.solver.eval(self.state.regs.sp + offset * self.state.arch.bits)) + "\t"
-              + str(self.state.stack_read(offset * self.state.arch.bits, self.state.arch.bytes)))
+              + self.__pstr_ast(self.state.stack_read(offset * self.state.arch.bits, self.state.arch.bytes)))
 
     def registers(self):
         """
@@ -62,9 +65,22 @@ class ContextView(SimStatePlugin):
 
         print reg.upper() + ":\t" + self.__pstr_ast(value)
 
+    def __describe_addr(self, addr, depth=0):
+        o = self.state.project.loader.find_object_containing(addr)
+        if o:
+            return " <%s>" % self.state.project.loader.describe_addr(addr)
+        else:
+            deref = self.state.mem[addr].uintptr_t.resolved
+            if deref.concrete or not deref.uninitialized:
+                return " --> %s" % self.__pstr_ast(deref)
+
     def __pstr_ast(self, ast):
         if ast.concrete:
-            return hex(self.state.solver.eval(ast))
+            value = self.state.solver.eval(ast)
+            if self.__describe_addr(value):
+                return hex(value) + self.__describe_addr(value)
+            else:
+                return hex(value)
         else:
             return str(ast)
 
