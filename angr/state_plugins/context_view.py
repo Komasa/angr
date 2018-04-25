@@ -15,25 +15,25 @@ class ContextView(SimStatePlugin):
         return ContextView()
 
     def red(self, text):
-        return "\x1b[6;31;40m"+text+"\x1b[0m"
+        return "\x1b[6;31m"+text+"\x1b[0m"
 
     def blue(self, text):
-        return "\x1b[6;34;40m"+text+"\x1b[0m"
+        return "\x1b[6;34m"+text+"\x1b[0m"
 
     def green(self, text):
-        return "\x1b[6;32;40m"+text+"\x1b[0m"
+        return "\x1b[6;32m"+text+"\x1b[0m"
 
     def yellow(self, text):
-        return "\x1b[6;33;40m"+text+"\x1b[0m"
+        return "\x1b[6;33m"+text+"\x1b[0m"
 
     def magenta(self, text):
-        return "\x1b[6;35;40m"+text+"\x1b[0m"
+        return "\x1b[6;35m"+text+"\x1b[0m"
 
     def underline(self, text):
         return "\x1b[4m"+text+"\x1b[0m"
 
     def grey(self, text):
-        return "\x1b[6;90;1;40m"+text+"\x1b[0m"
+        return "\x1b[6;90;1m"+text+"\x1b[0m"
 
     def BVtoREG(self, bv):
         if type(bv) == str:
