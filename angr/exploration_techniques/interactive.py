@@ -23,8 +23,10 @@ class Interactive(ExplorationTechnique):
                 print("Picking state with ip: " + (str(ip)))
                 simgr.move(from_stash='active',
                            to_stash="stashed",
-                           filter_func=lambda x: x.solver.eval(ip !=x.regs.ip))
-                simgr.one_active.context_view.pprint()
+                           filter_func=lambda x: x.solver.eval(ip != x.regs.ip))
+                simgr.step(stash=stash, extra_stop_points=None)
+                if type(kwargs.get("p")) is int:
+                    simgr.active[kwargs.get("p")].context_view.pprint()
 
         else:
             simgr.step(stash=stash, extra_stop_points=None)
