@@ -35,6 +35,22 @@ class ContextView(SimStatePlugin):
     def grey(self, text):
         return "\x1b[6;90;1;40m"+text+"\x1b[0m"
 
+    def BVtoREG(self, bv):
+        if type(bv) == str:
+            return bv
+        if "reg" in str(bv):
+            print "converting ", str(bv)
+            #import IPython; IPython.embed()
+            args = list()
+            for v in self.state.se.describe_variables(bv):
+                if "reg" in v:
+                    ridx = v[1]
+                    regname =  self.state.arch.register_names[ridx]
+            replname = str(bv).replace("reg_"+hex(ridx)[2:], regname)
+            print "returning ", replname
+            return replname
+        return str(bv)
+
     def print_legend(self):
         s = "LEGEND: "
         s += self.green("SYMBOLIC")
@@ -48,10 +64,11 @@ class ContextView(SimStatePlugin):
         print(s)
 
     def cc(self, bv): # return color coded version of BV 
+        x = self.BVtoREG(bv)
         if bv.symbolic:
             if bv.uninitialized:
-                return self.grey(self.__pstr_ast(bv))
-            return self.green(self.__pstr_ast(bv)) 
+                return self.grey(self.BVtoREG(bv))
+            return self.green(self.BVtoREG(self.__pstr_ast(bv))) 
         # its concrete
         value = self.state.se.eval(bv)
         if self.state.project.loader.find_object_containing(value):
@@ -88,7 +105,7 @@ class ContextView(SimStatePlugin):
         self.state.project.factory.block(ip).pp()
 
     def stack(self):
-        stackdepth = 8
+        stackdepth = 24
         print(self.blue("[------------------------------------stack-------------------------------------]"))
         #Not sure if that can happen, but if it does things will break
         if not self.state.regs.sp.concrete:
@@ -103,7 +120,10 @@ class ContextView(SimStatePlugin):
         print("%s| %s --> %s" % (
             "{0:#04x}".format(offset * self.state.arch.bytes),
             self.cc(self.state.regs.sp + offset * self.state.arch.byte_width),
-            self.cc(self.state.stack_read(offset * self.state.arch.bits, self.state.arch.bytes))))
+            self.cc(self.state.stack_read(offset * self.state.arch.byte_width, self.state.arch.bytes))))
+        #print "sp: ", self.state.regs.sp, " offset: ", offset, " bits: ", self.state.arch.bits
+        #print "--> ", self.state.regs.sp + offset * self.state.arch.bits
+        #print(self.state.memory.load(0x7fffffffffefe70L, 8,  endness=self.state.arch.memory_endness)) 
 
 
     def registers(self):
