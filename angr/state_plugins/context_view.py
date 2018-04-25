@@ -71,7 +71,7 @@ class ContextView(SimStatePlugin):
         if self.state.project.loader.find_object_containing(value):
             descr = " <%s>" % self.state.project.loader.describe_addr(value)
             return self.red(hex(value) + descr)
-        if value >= self.state.se.eval(self.state.regs.sp) and value <= self.state.arch.initial_sp:
+        if value >= self.state.se.eval(self.state.regs.sp) and value < self.state.arch.initial_sp:
             return self.yellow(hex(value))
         try:
             return self.__pstr_ast(bv)
@@ -102,7 +102,7 @@ class ContextView(SimStatePlugin):
         self.state.project.factory.block(ip).pp()
 
     def stack(self):
-        stackdepth = 24
+        stackdepth = 8
         print(self.blue("[------------------------------------stack-------------------------------------]"))
         #Not sure if that can happen, but if it does things will break
         if not self.state.regs.sp.concrete:
