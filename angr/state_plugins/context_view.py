@@ -84,6 +84,7 @@ class ContextView(SimStatePlugin):
         self.print_legend()
         self.state.context_view.registers()
         self.state.context_view.code()
+        self.state.context_view.fds()
         self.state.context_view.stack()
 
     def code(self):
@@ -100,6 +101,14 @@ class ContextView(SimStatePlugin):
             f = self.state.project.kb.functions.floor_func(ip)
             print(f.name + "+" + hex(ip - f.addr))
         self.state.project.factory.block(ip).pp()
+
+    def fds(self):
+        if ["", "", ""] == [self.state.posix.dumps(x) for x in self.state.posix.fd]:
+            return
+        print(self.blue("[-------------------------------filedescriptors--------------------------------]"))
+        for fd in self.state.posix.fd:
+            print "fd "+str(fd), ":", repr(self.state.posix.dumps(fd))
+        
 
     def stack(self):
         stackdepth = 8
