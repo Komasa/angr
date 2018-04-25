@@ -83,6 +83,13 @@ class ContextView(SimStatePlugin):
         self.state.context_view.code()
         self.state.context_view.fds()
         self.state.context_view.stack()
+        self.state.context_view.backtrace()
+
+    def backtrace(self):
+        print(self.blue("[-------------------------------------backtrace--------------------------------]"))
+        print("Backtrace:\n%s" % "\n".join("Frame %d: %#x => %#x, sp = %#x" % (i, f.call_site_addr, f.func_addr, f.stack_ptr) for i, f in enumerate(self.state.callstack)))
+
+
 
     def code(self):
         print(self.blue("[-------------------------------------code-------------------------------------]"))
