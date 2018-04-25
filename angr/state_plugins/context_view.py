@@ -39,15 +39,12 @@ class ContextView(SimStatePlugin):
         if type(bv) == str:
             return bv
         if "reg" in str(bv):
-            print "converting ", str(bv)
-            #import IPython; IPython.embed()
             args = list()
             for v in self.state.se.describe_variables(bv):
                 if "reg" in v:
                     ridx = v[1]
                     regname =  self.state.arch.register_names[ridx]
             replname = str(bv).replace("reg_"+hex(ridx)[2:], regname)
-            print "returning ", replname
             return replname
         return str(bv)
 
@@ -121,9 +118,6 @@ class ContextView(SimStatePlugin):
             "{0:#04x}".format(offset * self.state.arch.bytes),
             self.cc(self.state.regs.sp + offset * self.state.arch.byte_width),
             self.cc(self.state.stack_read(offset * self.state.arch.byte_width, self.state.arch.bytes))))
-        #print "sp: ", self.state.regs.sp, " offset: ", offset, " bits: ", self.state.arch.bits
-        #print "--> ", self.state.regs.sp + offset * self.state.arch.bits
-        #print(self.state.memory.load(0x7fffffffffefe70L, 8,  endness=self.state.arch.memory_endness)) 
 
 
     def registers(self):
