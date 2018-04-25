@@ -60,12 +60,12 @@ class ContextView(SimStatePlugin):
         s += " | RODATA"
         print(s)
 
-    def cc(self, bv): # return color coded version of BV 
-        x = self.BVtoREG(bv)
+    def cc(self, bv):
+        """Takes a BV and returns a colored string"""
         if bv.symbolic:
             if bv.uninitialized:
                 return self.grey(self.BVtoREG(bv))
-            return self.green(self.BVtoREG(self.__pstr_ast(bv))) 
+            return self.green(self.BVtoREG(bv))
         # its concrete
         value = self.state.se.eval(bv)
         if self.state.project.loader.find_object_containing(value):
@@ -73,10 +73,7 @@ class ContextView(SimStatePlugin):
             return self.red(hex(value) + descr)
         if value >= self.state.se.eval(self.state.regs.sp) and value < self.state.arch.initial_sp:
             return self.yellow(hex(value))
-        try:
-            return self.__pstr_ast(bv)
-        except Exception as e:
-            return str(bv)
+        return str(bv)
         
 
     def pprint(self):
@@ -123,10 +120,21 @@ class ContextView(SimStatePlugin):
 
     def __pprint_stack_element(self, offset):
         """Print stack element in the form OFFSET| ADDRESS --> CONTENT"""
-        print("%s| %s --> %s" % (
-            "{0:#04x}".format(offset * self.state.arch.bytes),
-            self.cc(self.state.regs.sp + offset * self.state.arch.bytes),
-            self.cc(self.state.stack_read(offset * self.state.arch.bytes, self.state.arch.bytes))))
+        l = "%s| " % ("{0:#04x}".format(offset * self.state.arch.bytes))
+        stackaddr = self.state.regs.sp + offset * self.state.arch.bytes
+        l += "%s " % self.cc(stackaddr)
+        stackval = self.state.stack_read(offset * self.state.arch.bytes, self.state.arch.bytes)
+        l += " --> %s" % self.cc(stackval)
+        if not stackval.symbolic:
+            print stackval
+            if stackval >= self.state.se.eval(self.state.regs.sp) and stackval < self.state.arch.initial_sp:
+		stackval = self.state.memor_load(stackval, self.state.arch.bytes, endness=self.state.arch.memory_endness)
+                l += " --> %s" % self.cc(stackval)
+        print l
+        #print("%s| %s --> %s" % (
+        #    "{0:#04x}".format(offset * self.state.arch.bytes),
+        #   self.cc(self.state.regs.sp + offset * self.state.arch.bytes),
+        #   self.cc(self.state.stack_read(offset * self.state.arch.bytes, self.state.arch.bytes))))
 
 
     def registers(self):
