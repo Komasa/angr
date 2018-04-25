@@ -88,7 +88,7 @@ class ContextView(SimStatePlugin):
         print(self.blue("[-------------------------------------code-------------------------------------]"))
         try:
             self.__pprint_codeblock(self.state.history.bbl_addrs[-1])
-            print("|\t" + self.cc(self.state.history.jump_guard) + "\nv")
+            print("\t|\t" + self.cc(self.state.history.jump_guard) + "\n\tv")
         except IndexError:
             pass
         self.__pprint_codeblock(self.state.solver.eval(self.state.regs.ip))
@@ -125,16 +125,16 @@ class ContextView(SimStatePlugin):
         l += "%s " % self.cc(stackaddr)
         stackval = self.state.stack_read(offset * self.state.arch.bytes, self.state.arch.bytes)
         l += " --> %s" % self.cc(stackval)
-        if not stackval.symbolic:
-            print stackval
+        max = 4
+        while max > 0:
+            if hasattr(stackval, "symbolic") and stackval.symbolic:
+                break
+            max = max - 1
+            stackval = self.state.se.eval(stackval)
             if stackval >= self.state.se.eval(self.state.regs.sp) and stackval < self.state.arch.initial_sp:
-		stackval = self.state.memor_load(stackval, self.state.arch.bytes, endness=self.state.arch.memory_endness)
+		stackval = self.state.memory.load(stackval, self.state.arch.bytes, endness=self.state.arch.memory_endness)
                 l += " --> %s" % self.cc(stackval)
         print l
-        #print("%s| %s --> %s" % (
-        #    "{0:#04x}".format(offset * self.state.arch.bytes),
-        #   self.cc(self.state.regs.sp + offset * self.state.arch.bytes),
-        #   self.cc(self.state.stack_read(offset * self.state.arch.bytes, self.state.arch.bytes))))
 
 
     def registers(self):
