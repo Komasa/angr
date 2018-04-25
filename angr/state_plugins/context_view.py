@@ -117,7 +117,7 @@ class ContextView(SimStatePlugin):
         print("%s| %s --> %s" % (
             "{0:#04x}".format(offset * self.state.arch.bytes),
             self.cc(self.state.regs.sp + offset * self.state.arch.byte_width),
-            self.cc(self.state.stack_read(offset * self.state.arch.byte_width, self.state.arch.bytes))))
+            self.cc(self.state.stack_read(offset * self.state.arch.bytes, self.state.arch.bytes))))
 
 
     def registers(self):
