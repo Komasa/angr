@@ -33,7 +33,7 @@ class ContextView(SimStatePlugin):
         return "\x1b[4m"+text+"\x1b[0m"
 
     def grey(self, text):
-        return "\x1b[6;30;1;40m"+text+"\x1b[0m"
+        return "\x1b[6;90;1;40m"+text+"\x1b[0m"
 
     def print_legend(self):
         s = "LEGEND: "
@@ -62,7 +62,7 @@ class ContextView(SimStatePlugin):
         try:
             return self.__pstr_ast(bv)
         except Exception as e:
-            return str(e)
+            return str(bv)
         
 
     def pprint(self):
