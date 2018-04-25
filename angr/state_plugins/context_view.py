@@ -62,7 +62,7 @@ class ContextView(SimStatePlugin):
         try:
             return self.__pstr_ast(bv)
         except Exception as e:
-            return str(bv)
+            return str(e)
         
 
     def pprint(self):
@@ -127,7 +127,9 @@ class ContextView(SimStatePlugin):
         else:
             deref = self.state.mem[addr].uintptr_t.resolved
             if deref.concrete or not deref.uninitialized:
-                return " --> %s" % self.__pstr_ast(deref)
+                value = self.state.solver.eval(deref)
+                if not value == addr:
+                    return " --> %s" % self.__pstr_ast(deref)
 
     def __pstr_ast(self, ast):
         """Return a pretty string for an AST including a description of the derefed value if it makes sense (i.e. if
