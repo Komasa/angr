@@ -10,6 +10,10 @@ class ContextView(SimStatePlugin):
     def __init__(self):
         super(ContextView, self).__init__()
 
+    def set_state(self, state):
+        super(ContextView, self).set_state(state)
+        self.stack = Stack(self.state)
+
     @SimStatePlugin.memo
     def copy(self, memo):
         return ContextView()
@@ -82,7 +86,7 @@ class ContextView(SimStatePlugin):
         self.state.context_view.registers()
         self.state.context_view.code()
         self.state.context_view.fds()
-        self.state.context_view.stack()
+        self.state.context_view.print_stack()
         self.state.context_view.backtrace()
 
     def backtrace(self):
@@ -114,7 +118,7 @@ class ContextView(SimStatePlugin):
             print "fd "+str(fd), ":", repr(self.state.posix.dumps(fd))
         
 
-    def stack(self):
+    def print_stack(self):
         stackdepth = 8
         print(self.blue("[------------------------------------stack-------------------------------------]"))
         #Not sure if that can happen, but if it does things will break
@@ -129,7 +133,7 @@ class ContextView(SimStatePlugin):
         """Print stack element in the form OFFSET| ADDRESS --> CONTENT"""
         l = "%s| " % ("{0:#04x}".format(offset * self.state.arch.bytes))
         try:
-            stackaddr, stackval = self.state.stack[offset]
+            stackaddr, stackval = self.stack[offset]
         except IndexError:
             return
         l += "%s " % self.cc(stackaddr)
@@ -193,4 +197,16 @@ class ContextView(SimStatePlugin):
                    + [self.state.arch.register_names[self.state.arch.ip_offset]]\
                    + [self.state.arch.register_names[self.state.arch.sp_offset]]\
                    + [self.state.arch.register_names[self.state.arch.bp_offset]]
+
+
+class Stack():
+    def __init__(self, state):
+        self.state = state
+
+    def __getitem__(self, offset):
+        """Returns a tuple of a stack element as (addr, content)"""
+        addr = self.state.regs.sp + offset * self.state.arch.bytes
+        if self.state.solver.eval(addr >= self.state.arch.initial_sp):
+            raise IndexError
+        return addr, self.state.memory.load(addr, size=self.state.arch.bytes, endness=self.state.arch.memory_endness)
 

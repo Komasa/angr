@@ -6,9 +6,9 @@ from .plugin import SimStatePlugin
 l = logging.getLogger('angr.state_plugins.stack')
 
 
-class Stack(SimStatePlugin):
+class Stack():
     def __init__(self):
-        super(Stack, self).__init__()
+        return
 
     def __getitem__(self, offset):
         """Returns a tuple of a stack element as (addr, content)"""
