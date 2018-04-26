@@ -73,7 +73,7 @@ class ContextView(SimStatePlugin):
             return self.red(hex(value) + descr)
         if value >= self.state.se.eval(self.state.regs.sp) and value < self.state.arch.initial_sp:
             return self.yellow(hex(value))
-        return str(bv)
+        return hex(value)
         
 
     def pprint(self):
@@ -148,13 +148,18 @@ class ContextView(SimStatePlugin):
 
     def __pprint_register(self, reg, value):
         repr = reg.upper() + ":\t"
-        repr += self.cc(value)
+        repr += self.__pstr_ast(value)
         print(repr)
 
-    def __describe_addr(self, addr, depth=0):
+
+    def describe_addr(self,addr):
+        return self.__deref_addr(addr)
+
+
+    def __deref_addr(self, addr, depth=0):
         o = self.state.project.loader.find_object_containing(addr)
         if o:
-            return " <%s>" % self.state.project.loader.describe_addr(addr)
+            return ""
         else:
             deref = self.state.mem[addr].uintptr_t.resolved
             if deref.concrete or not deref.uninitialized:
@@ -167,12 +172,12 @@ class ContextView(SimStatePlugin):
         the ast is concrete and the derefed value is not uninitialized"""
         if ast.concrete:
             value = self.state.solver.eval(ast)
-            if self.__describe_addr(value):
-                return hex(value) + self.__describe_addr(value)
+            if self.__deref_addr(value):
+                return self.cc(ast) + self.__deref_addr(value)
             else:
-                return hex(value)
+                return self.cc(ast)
         else:
-            return str(ast)
+            return self.cc(ast)
 
     def default_registers(self):
         custom ={
