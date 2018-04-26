@@ -139,7 +139,7 @@ class ContextView(SimStatePlugin):
             max = max - 1
             stackval = self.state.se.eval(stackval)
             if stackval >= self.state.se.eval(self.state.regs.sp) and stackval < self.state.arch.initial_sp:
-		stackval = self.state.memory.load(stackval, self.state.arch.bytes, endness=self.state.arch.memory_endness)
+                stackval = self.state.memory.load(stackval, self.state.arch.bytes, endness=self.state.arch.memory_endness)
                 l += " --> %s" % self.cc(stackval)
         print l
 
