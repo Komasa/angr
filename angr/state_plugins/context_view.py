@@ -5,6 +5,9 @@ from .plugin import SimStatePlugin
 
 l = logging.getLogger('angr.state_plugins.context_view')
 
+from pygments import highlight
+from pygments.lexers import NasmLexer
+from pygments.formatters import TerminalFormatter
 
 class ContextView(SimStatePlugin):
     def __init__(self):
@@ -108,7 +111,8 @@ class ContextView(SimStatePlugin):
         if "functions" in dir(self.state.project.kb):
             f = self.state.project.kb.functions.floor_func(ip)
             print(f.name + "+" + hex(ip - f.addr))
-        self.state.project.factory.block(ip).pp()
+        code = self.state.block().capstone.__str__()
+        print highlight(code, NasmLexer(), TerminalFormatter())
 
     def fds(self):
         if ["", "", ""] == [self.state.posix.dumps(x) for x in self.state.posix.fd]:
