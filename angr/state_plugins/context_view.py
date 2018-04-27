@@ -141,7 +141,7 @@ class ContextView(SimStatePlugin):
         except IndexError:
             return
         l += "%s " % self.cc(stackaddr)
-        l += " --> %s" % self.cc(stackval)
+        l += " --> %s" % self.__pstr_ast(stackval)
         print l
 
 
