@@ -12,11 +12,20 @@ class Interactive(ExplorationTechnique):
         self._complete = False
 
     def step(self, simgr, stash=None, **kwargs):
-        if len(simgr.active) != 1:
+        self._complete = False
+        if len(simgr.active) == 0:
+            l.warn("No active states")
+            return simgr
+
+        if len(simgr.active) > 1:
             if not type(kwargs.get("pick")) is int:
                 if type(kwargs.get("p")) is int:
                     simgr.active[kwargs.get("p")].context_view.pprint()
                 l.warn("Multiple active states, pick one")
+                print(simgr.one_active.context_view.blue(
+                    "[------------------------------Next Possible States----------------------------]"))
+                for idx, state in enumerate(simgr.active):
+                    print state.context_view.pstr_branch_info(idx=idx)
                 self._complete = True
             else:
                 ip = simgr.active[kwargs.get('pick')].regs.ip
@@ -32,8 +41,12 @@ class Interactive(ExplorationTechnique):
             simgr.step(stash=stash, extra_stop_points=None)
             if type(kwargs.get("p"))is int:
                 simgr.one_active.context_view.pprint()
-            if len(simgr.active) != 1:
+            if len(simgr.active) > 1:
                 return simgr.active[0].context_view.pprint()
+            if len(simgr.deadended) > 0:
+                l.warn("State deadended")
+                simgr.deadended[0].context_view.pprint()
+
 
 
     def complete(self, simgr):

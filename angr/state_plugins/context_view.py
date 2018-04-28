@@ -141,7 +141,7 @@ class ContextView(SimStatePlugin):
         except IndexError:
             return
         l += "%s " % self.cc(stackaddr)
-        l += " --> %s" % self.__pstr_ast(stackval)
+        l += " --> %s" % self.pstr_ast(stackval)
         print l
 
 
@@ -156,7 +156,7 @@ class ContextView(SimStatePlugin):
 
     def __pprint_register(self, reg, value):
         repr = reg.upper() + ":\t"
-        repr += self.__pstr_ast(value)
+        repr += self.pstr_ast(value)
         print(repr)
 
 
@@ -173,9 +173,9 @@ class ContextView(SimStatePlugin):
             if deref.concrete or not deref.uninitialized:
                 value = self.state.solver.eval(deref)
                 if not value == addr:
-                    return " --> %s" % self.__pstr_ast(deref)
+                    return " --> %s" % self.pstr_ast(deref)
 
-    def __pstr_ast(self, ast):
+    def pstr_ast(self, ast):
         """Return a pretty string for an AST including a description of the derefed value if it makes sense (i.e. if
         the ast is concrete and the derefed value is not uninitialized"""
         if ast.concrete:
@@ -201,6 +201,16 @@ class ContextView(SimStatePlugin):
                    + [self.state.arch.register_names[self.state.arch.ip_offset]]\
                    + [self.state.arch.register_names[self.state.arch.sp_offset]]\
                    + [self.state.arch.register_names[self.state.arch.bp_offset]]
+
+    def pstr_branch_info(self, idx=None):
+        """Return the information about the state concerning the last branch as a pretty string"""
+        str_rip = self.pstr_ast(self.state.regs.rip)
+        int_rip = self.state.solver.eval(self.state.regs.rip)
+        jump_guard = self.pstr_ast(self.state.history.jump_guard)
+        vars = self.state.history.jump_guard.variables
+
+        return "%sIP: %s\tCond: %s\n\tVars: %s\n" %\
+               (str(idx) + ":\t" if type(idx) is int else "", str_rip, jump_guard, vars)
 
 
 class Stack():
