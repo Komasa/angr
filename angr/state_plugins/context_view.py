@@ -9,6 +9,9 @@ from pygments import highlight
 from pygments.lexers import NasmLexer
 from pygments.formatters import TerminalFormatter
 
+
+MAX_AST_DEPTH = 5
+
 class ContextView(SimStatePlugin):
     def __init__(self):
         super(ContextView, self).__init__()
@@ -185,6 +188,9 @@ class ContextView(SimStatePlugin):
             else:
                 return self.cc(ast)
         else:
+            if ast.depth > MAX_AST_DEPTH:
+                # AST is probably too large to render
+                return self.green("<AST: Depth: %d Vars: %s Hash: %x>" %(ast.depth, ast.variables, ast.__hash__()))
             return self.cc(ast)
 
     def default_registers(self):
