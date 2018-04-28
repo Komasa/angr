@@ -100,11 +100,26 @@ class ContextView(SimStatePlugin):
         print("Backtrace:\n%s" % "\n".join("Frame %d: %#x => %#x, sp = %#x" % (i, f.call_site_addr, f.func_addr, f.stack_ptr) for i, f in enumerate(self.state.callstack)))
 
 
+    def __get_prev_block(self):
+        """Find the previously block in terms of what a human would expect (e.g. if the last state was a SimProc
+        I don't know a better way to do this...
+        Iterates over the last executed basic blocks and tries to find the first one
+        that isn't in the extern_object and is thus not a SimProc
+        """
+        for idx in range(-1, -20, -1):
+            try:
+                addr = self.state.history.bbl_addrs[idx]
+                if self.state.project.loader.find_object_containing(addr) != self.state.project.loader.extern_object:
+                    return addr
+            except IndexError:
+                l.warn("No state in the recent history was not a simproc, no idea how this can happen")
+                break
+
 
     def code(self):
         print(self.blue("[-------------------------------------code-------------------------------------]"))
         try:
-            self.__pprint_codeblock(self.state.history.bbl_addrs[-1])
+            self.__pprint_codeblock(self.__get_prev_block())
             print("\t|\t" + self.cc(self.state.history.jump_guard) + "\n\tv")
         except IndexError:
             pass
@@ -114,7 +129,7 @@ class ContextView(SimStatePlugin):
         if "functions" in dir(self.state.project.kb):
             f = self.state.project.kb.functions.floor_func(ip)
             print(f.name + "+" + hex(ip - f.addr))
-        code = self.state.block().capstone.__str__()
+        code = self.state.project.factory.block(ip).capstone.__str__()
         print highlight(code, NasmLexer(), TerminalFormatter())
 
     def fds(self):
