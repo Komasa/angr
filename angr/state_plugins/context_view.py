@@ -121,14 +121,25 @@ class ContextView(SimStatePlugin):
         try:
             self.__pprint_codeblock(self.__get_prev_block())
             print("\t|\t" + self.cc(self.state.history.jump_guard) + "\n\tv")
-        except IndexError:
+        except:
             pass
         self.__pprint_codeblock(self.state.solver.eval(self.state.regs.ip))
 
+    def print_codeblock(self, ip):
+        self.__pprint_codeblock(ip)
+
+
     def __pprint_codeblock(self, ip):
-        if "functions" in dir(self.state.project.kb):
+        # Check if we are currently in the extern object in which case printing disassembly is pointless
+        o = self.state.project.loader.find_object_containing(ip)
+        if o == self.state.project.loader.extern_object:
+            print self.state.project._sim_procedures[ip]
+            return
+        try:
             f = self.state.project.kb.functions.floor_func(ip)
             print(f.name + "+" + hex(ip - f.addr))
+        except:
+            pass
         code = self.state.project.factory.block(ip).capstone.__str__()
         print highlight(code, NasmLexer(), TerminalFormatter())
 
