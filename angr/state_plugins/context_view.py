@@ -163,12 +163,22 @@ class ContextView(SimStatePlugin):
 
 
     def __pprint_stack_element(self, offset):
-        """Print stack element in the form OFFSET| ADDRESS --> CONTENT"""
-        l = "%s| " % ("{0:#04x}".format(offset * self.state.arch.bytes))
+        """Print stack element in the form IDX:OFFSET|      ADDRESS --> CONTENT"""
+        l = "%s:" % ("{0:#02d}".format(offset))
+        l += "%s| " % ("{0:#04x}".format(offset * self.state.arch.bytes))
         try:
             stackaddr, stackval = self.stack[offset]
         except IndexError:
             return
+
+        if self.state.se.eval(stackaddr) == self.state.se.eval(self.state.regs.sp, cast_to=int):
+            l += "sp" 
+        elif self.state.se.eval(stackaddr) == self.state.se.eval(self.state.regs.bp, cast_to=int):
+            l += "bp" 
+        else:
+            l += "  "
+        l += " "
+
         l += "%s " % self.cc(stackaddr)
         l += " --> %s" % self.pstr_ast(stackval)
         print l
